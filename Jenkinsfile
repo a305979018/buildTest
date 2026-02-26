@@ -1,8 +1,7 @@
 pipeline {
     agent any
     options {
-        timestamps()
-        ansiColor('xterm')
+        timestamps()   // 时间戳可以保留
     }
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
@@ -26,7 +25,9 @@ pipeline {
         }
         stage('Build') {
             steps {
-                bat ".\\build-ci.bat %MODULE% %BUILD_TYPE%"
+                ansiColor('xterm') {   // <- 放在 steps 内
+                    bat ".\\build-ci.bat %MODULE% %BUILD_TYPE%"
+                }
             }
         }
         stage('Archive') {
