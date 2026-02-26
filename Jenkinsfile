@@ -1,7 +1,7 @@
 pipeline {
     agent any
     options {
-        timestamps()   // 控制台显示时间戳
+        timestamps()
     }
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
@@ -13,40 +13,32 @@ pipeline {
         ANDROID_HOME = "E:\\AndroidSDK"
         JAVA_HOME = "D:\\JDK17"
         PATH = "${JAVA_HOME}\\bin;${ANDROID_HOME}\\platform-tools;${env.PATH}"
-        // 如果你想使用本地 Gradle 的完整路径，也可以加：
-        GRADLE_HOME = "D:\\Gradle\\gradle-8.4"
+        GRADLE_USER_HOME = "D:\\Jenkins_GradleCache"  // 指定 Gradle 缓存目录
     }
     stages {
         stage('Checkout') {
             steps {
-                // 拉取指定分支
                 checkout([$class: 'GitSCM',
                     branches: [[name: "${params.BRANCH_NAME}"]],
                     userRemoteConfigs: [[url: "${params.REPO_URL}"]]
                 ])
             }
         }
-
         stage('Build') {
             steps {
                 script {
-                    // Windows 下调用你本地的 build-ci.bat
                     bat ".\\build-ci.bat %MODULE% %BUILD_TYPE%"
-                    
-                    // 如果你想直接调用 Gradle 而不通过 bat 文件：
-                    // bat "%GRADLE_HOME%\\bin\\gradle.bat ${params.MODULE}:${params.BUILD_TYPE}"
+                    // 或者直接调用 Gradle：
+                    // bat "%GRADLE_USER_HOME%\\..\\gradle-8.4\\bin\\gradle.bat ${params.MODULE}:${params.BUILD_TYPE}"
                 }
             }
         }
-
         stage('Archive') {
             steps {
-                // 打包产物归档
                 archiveArtifacts artifacts: '**/build/outputs/**/*.apk, **/build/outputs/**/*.aab, **/outputs/mapping/**', fingerprint: true
             }
         }
     }
-
     post {
         always {
             echo "Build finished for ${params.MODULE} ${params.BUILD_TYPE}"
