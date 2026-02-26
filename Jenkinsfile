@@ -26,12 +26,12 @@ pipeline {
         }
         stage('Build') {
             steps {
-                bat ".\\gradlew.bat :%MODULE%:clean :%MODULE%:assemble%BUILD_TYPE% -x test"
+                bat ".\\build-ci.bat %MODULE% %BUILD_TYPE%"
             }
         }
         stage('Archive') {
             steps {
-                archiveArtifacts artifacts: 'app/build/outputs/**/*.apk, app/build/outputs/**/*.aab, **/outputs/mapping/**', fingerprint: true
+                archiveArtifacts artifacts: '**/build/outputs/**/*.apk, **/build/outputs/**/*.aab, **/outputs/mapping/**', fingerprint: true
             }
         }
     }
